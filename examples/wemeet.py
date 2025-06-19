@@ -87,7 +87,7 @@ def init_agent_service():
 
     #Define a router (simultaneously serving as a text agent)
     bot = Router(
-        name='WeMeet',
+        name="What's this?",
         llm=llm_cfg,
         agents=[bot_amap,  bot_vl, bot_imagegen],
     )
