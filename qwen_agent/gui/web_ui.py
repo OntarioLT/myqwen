@@ -44,6 +44,7 @@ class WebUI:
         if isinstance(agent, MultiAgentHub):
             self.agent_list = [agent for agent in agent.nonuser_agents]
             self.agent_hub = agent
+            self.agent_list.insert(0, self.agent_hub)
         elif isinstance(agent, list):
             self.agent_list = agent
             self.agent_hub = None
@@ -60,14 +61,14 @@ class WebUI:
             ),
         }
 
-        self.agent_config_list = [{
+        self.agent_config_list = ([{
             'name': agent.name,
             'avatar': chatbot_config.get(
                 'agent.avatar',
                 get_avatar_image(agent.name),
             ),
             'description': agent.description or "I'm a helpful assistant.",
-        } for agent in self.agent_list]
+        } for agent in self.agent_list])
 
         self.input_placeholder = chatbot_config.get('input.placeholder', '跟我聊聊吧～')
         self.prompt_suggestions = chatbot_config.get('prompt.suggestions', [])
@@ -110,7 +111,7 @@ class WebUI:
                                                   self.user_config,
                                                   self.agent_config_list,
                                               ],
-                                              height=850,
+                                              height=700,
                                               avatar_image_width=80,
                                               flushing=False,
                                               show_copy_button=True,
@@ -154,8 +155,8 @@ class WebUI:
                         if len(self.agent_list) > 1:
                             agent_selector = gr.Dropdown(
                                 [(agent.name, i) for i, agent in enumerate(self.agent_list)],
-                                label='Agents',
-                                info='选择一个Agent',
+                                label='查看智能体',
+                                info='选择一个智能体',
                                 value=0,
                                 interactive=True,
                             )
@@ -235,7 +236,7 @@ class WebUI:
         if _input.files:
             for file in _input.files:
                 if file.mime_type.startswith('image/'):
-                    _history[-1][CONTENT].append({IMAGE: 'file://' + file.path})
+                    _history[-1][CONTENT].append({IMAGE: file.path})
                 elif file.mime_type.startswith('audio/'):
                     _history[-1][CONTENT].append({AUDIO: 'file://' + file.path})
                 elif file.mime_type.startswith('video/'):
@@ -343,7 +344,7 @@ class WebUI:
 
     def _create_agent_info_block(self, agent_index=0):
         from qwen_agent.gui.gradio_dep import gr
-
+        
         agent_config_interactive = self.agent_config_list[agent_index]
 
         return gr.HTML(
