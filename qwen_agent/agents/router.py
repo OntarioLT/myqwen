@@ -22,6 +22,7 @@ from qwen_agent.llm.schema import ASSISTANT, ROLE, SYSTEM, Message
 from qwen_agent.log import logger
 from qwen_agent.tools import BaseTool
 from qwen_agent.utils.utils import merge_generate_cfgs
+from mem0 import Memory
 
 ROUTER_PROMPT = '''你有下列帮手：
 {agent_descs}
@@ -42,15 +43,18 @@ class Router(Assistant, MultiAgentHub):
                  name: Optional[str] = None,
                  description: Optional[str] = None,
                  agents: Optional[List[Agent]] = None,
+                 mem0: Optional[Memory] = None,
                  rag_cfg: Optional[Dict] = None):
         self._agents = agents
         agent_descs = '\n'.join([f'{x.name}: {x.description}' for x in agents])
         agent_names = ', '.join(self.agent_names)
+
         super().__init__(function_list=function_list,
                          llm=llm,
                          system_message=ROUTER_PROMPT.format(agent_descs=agent_descs, agent_names=agent_names),
                          name=name,
                          description=description,
+                         mem0=mem0,
                          files=files,
                          rag_cfg=rag_cfg)
         self.extra_generate_cfg = merge_generate_cfgs(

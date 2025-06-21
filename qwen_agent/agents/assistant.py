@@ -23,6 +23,7 @@ from qwen_agent.llm.schema import CONTENT, DEFAULT_SYSTEM_MESSAGE, ROLE, SYSTEM,
 from qwen_agent.log import logger
 from qwen_agent.tools import BaseTool
 from qwen_agent.utils.utils import get_basename_from_url, print_traceback
+from mem0 import Memory
 
 KNOWLEDGE_TEMPLATE_ZH = """# 知识库
 
@@ -87,6 +88,7 @@ class Assistant(FnCallAgent):
                  system_message: Optional[str] = DEFAULT_SYSTEM_MESSAGE,
                  name: Optional[str] = None,
                  description: Optional[str] = None,
+                 mem0: Optional[Memory] = None,
                  files: Optional[List[str]] = None,
                  rag_cfg: Optional[Dict] = None):
         super().__init__(function_list=function_list,
@@ -96,6 +98,7 @@ class Assistant(FnCallAgent):
                          description=description,
                          files=files,
                          rag_cfg=rag_cfg)
+        self.mem0 = mem0
 
     def _run(self,
              messages: List[Message],
@@ -109,16 +112,35 @@ class Assistant(FnCallAgent):
               it will be used directly without retrieving information from files in messages.
 
         """
-
-        new_messages = self._prepend_knowledge_prompt(messages=messages, lang=lang, knowledge=knowledge, **kwargs)
+        #we will track separate memory inside separate agent
+        #Todo... only track user persona in toplevel
+        mem0_memories = None
+        if self.name != 'WeMeet':
+            query = messages[-1]['content'][-1]['text']
+            mem0_memories = self.mem0.search(query, user_id=self.name, limit=3, threshold=0.7)
+            self.mem0.add(query, user_id=self.name)
+            logger.debug(f'Added to mem0 with user_id {self.name}:\n {query}')
+            if mem0_memories:
+                # mem0_memories = '\n'.join([result["memory"] for result in mem0_memories["results"]])
+                logger.debug(f'Return from mem0 with user_id {self.name}:\n {mem0_memories}')
+        new_messages = self._prepend_knowledge_prompt(messages=messages, lang=lang, knowledge=knowledge, mem0=mem0_memories, **kwargs)
         return super()._run(messages=new_messages, lang=lang, **kwargs)
 
     def _prepend_knowledge_prompt(self,
                                   messages: List[Message],
                                   lang: Literal['en', 'zh'] = 'en',
                                   knowledge: str = '',
+                                  mem0:json = None,
                                   **kwargs) -> List[Message]:
         messages = copy.deepcopy(messages)
+
+        snippets = []
+        #Firstly process mem0
+        if mem0:
+            if len(mem0['results']) > 0 :
+                snippets.append(KNOWLEDGE_SNIPPET[lang].format(source='Memory', content=mem0))
+
+        #then process knowledge
         if not knowledge:
             # Retrieval knowledge from files
             *_, last = self.mem.run(messages=messages, lang=lang, **kwargs)
@@ -130,7 +152,7 @@ class Assistant(FnCallAgent):
             logger.debug(f'Formatted knowledge into type `{type(knowledge).__name__}`:\n{knowledge}')
         else:
             knowledge = []
-        snippets = []
+        
         for k in knowledge:
             snippets.append(KNOWLEDGE_SNIPPET[lang].format(source=k['source'], content=k['content']))
         knowledge_prompt = ''
