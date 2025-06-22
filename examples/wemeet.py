@@ -86,8 +86,9 @@ def init_agent_service():
     # Initialize Memory with the configuration
     mem0 = Memory.from_config(mem0_config)
     # Add an inital memory
-    mem0.add("This is local persistent memory for agent wemeet", user_id="wemeet", metadata={"category": 'description'})
-
+    
+    # mem0.delete_all(user_id="WeMeet")
+    
     # Define a vl agent
     bot_vl = Assistant(llm=llm_cfg_vl, name='多模态助手', mem0=mem0, description='可以理解图像内容。')
 

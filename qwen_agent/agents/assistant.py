@@ -102,7 +102,7 @@ class Assistant(FnCallAgent):
 
     def _run(self,
              messages: List[Message],
-             lang: Literal['en', 'zh'] = 'en',
+             lang: Literal['en', 'zh'] = 'zh',
              knowledge: str = '',
              **kwargs) -> Iterator[List[Message]]:
         """Q&A with RAG and tool use abilities.
@@ -118,17 +118,17 @@ class Assistant(FnCallAgent):
         if self.name != 'WeMeet':
             query = messages[-1]['content'][-1]['text']
             mem0_memories = self.mem0.search(query, user_id=self.name, limit=3, threshold=0.7)
-            self.mem0.add(query, user_id=self.name)
-            logger.debug(f'Added to mem0 with user_id {self.name}:\n {query}')
+            queryAdded = self.mem0.add(query, user_id=self.name)
+            logger.debug(f'Added to mem0 with user_id {self.name}:\n {queryAdded}')
             if mem0_memories:
                 # mem0_memories = '\n'.join([result["memory"] for result in mem0_memories["results"]])
-                logger.debug(f'Return from mem0 with user_id {self.name}:\n {mem0_memories}')
+                logger.debug(f'Search Return from mem0 with user_id {self.name}:\n {mem0_memories}')
         new_messages = self._prepend_knowledge_prompt(messages=messages, lang=lang, knowledge=knowledge, mem0=mem0_memories, **kwargs)
         return super()._run(messages=new_messages, lang=lang, **kwargs)
 
     def _prepend_knowledge_prompt(self,
                                   messages: List[Message],
-                                  lang: Literal['en', 'zh'] = 'en',
+                                  lang: Literal['en', 'zh'] = 'zh',
                                   knowledge: str = '',
                                   mem0:json = None,
                                   **kwargs) -> List[Message]:
@@ -136,9 +136,9 @@ class Assistant(FnCallAgent):
 
         snippets = []
         #Firstly process mem0
-        if mem0:
+        if mem0 :
             if len(mem0['results']) > 0 :
-                snippets.append(KNOWLEDGE_SNIPPET[lang].format(source='Memory', content=mem0))
+                snippets.append(KNOWLEDGE_SNIPPET[lang].format(source='之前问过的类似问题', content=mem0))
 
         #then process knowledge
         if not knowledge:
@@ -172,7 +172,7 @@ class Assistant(FnCallAgent):
 
 
 def get_current_date_str(
-    lang: Literal['en', 'zh'] = 'en',
+    lang: Literal['en', 'zh'] = 'zh',
     hours_from_utc: Optional[int] = None,
 ) -> str:
     if hours_from_utc is None:

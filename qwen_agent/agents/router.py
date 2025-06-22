@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import copy
+import json
 from typing import Dict, Iterator, List, Optional, Union
 
 from qwen_agent import Agent, MultiAgentHub
@@ -62,7 +63,7 @@ class Router(Assistant, MultiAgentHub):
             new_generate_cfg={'stop': ['Reply:', 'Reply:\n']},
         )
 
-    def _run(self, messages: List[Message], lang: str = 'en', **kwargs) -> Iterator[List[Message]]:
+    def _run(self, messages: List[Message], lang: str = 'zh', **kwargs) -> Iterator[List[Message]]:         
         # This is a temporary plan to determine the source of a message
         messages_for_router = []
         for msg in messages:

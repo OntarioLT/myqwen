@@ -1,0 +1,27 @@
+{
+  "userId": "WeMeet", // 本地默认用户
+  "basicProfile": {
+    "gender": "Male",
+    "occupation": "IT工程师", // 职业（从提问内容推断）
+    "region": "西安" // 根据IP或时区推测
+  },
+  "knowledgeDemand": {
+    "questionStats": {
+      "totalCount": 127, // 历史总提问数
+    },
+    "topicDistribution": [ // 问题类型分布
+      { "category": "编程", "ratio": 0.4 },
+      { "category": "旅游", "ratio": 0.3 },
+      { "category": "AI", "ratio": 0.2 },
+      { "category": "其它", "ratio": 0.1 }
+    ],
+    "complexityLevel": "high", // 问题复杂度（高/中/低，基于回答所需技术深度）
+    "contentPreference": "风格严谨，包含示例" // 偏好回答形式（从追问行为分析）
+  },
+  "interestProfile": {
+    "Dynamic": ["AI智能体", "爬山", "ChatBI"] // 动态兴趣图谱（根据最近半年提问提炼）
+    "Long-term" ["AI", "旅游"]
+  },  
+  "tags": ["技术深度导向", "高频活跃", "AI专家"] // 聚合标签
+  "others": "毕业于西安交大" //额外的有用信息
+}
