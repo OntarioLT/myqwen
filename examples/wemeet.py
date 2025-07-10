@@ -85,18 +85,19 @@ def init_agent_service():
 
     # Initialize Memory with the configuration
     mem0 = Memory.from_config(mem0_config)
-    # Add an inital memory
-    
-    # mem0.delete_all(user_id="WeMeet")
+    # Add a memory
+    mem0.add("I'm visiting HongKong", user_id="Lei Tian")
+    # Retrieve memories
+    # memories = mem0.get_all(user_id="Lei Tian")
     
     # Define a vl agent
-    bot_vl = Assistant(llm=llm_cfg_vl, name='多模态助手', mem0=mem0, description='可以理解图像内容。')
+    bot_vl = Assistant(llm=llm_cfg_vl, name='Multimodal Assistant', mem0=mem0, description='be able to understand image')
 
     # Define a image_gen agent
     bot_imagegen = ReActChat(
         llm=llm_cfg,
-        name='工具助手',
-        description='可以使用画图工具和运行代码来解决问题',
+        name='Image Generation Assistant',
+        description='use drawing tools and run code to solve problems',
         function_list=['image_gen', 'code_interpreter'],
     )
 
@@ -114,8 +115,8 @@ def init_agent_service():
 
     bot_amap = Assistant(
         llm=llm_cfg, 
-        name='高德地图助手',
-        description='可以使用高德地图工具列表回答出行相关问题（可查询天气）',
+        name='Amap Assistant',
+        description='use the Amap tools list to answer travel-related questions (including weather inquiries)',
         function_list=amap_tools,
         mem0=mem0,
     )

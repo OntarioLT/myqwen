@@ -155,8 +155,8 @@ class WebUI:
                         if len(self.agent_list) > 1:
                             agent_selector = gr.Dropdown(
                                 [(agent.name, i) for i, agent in enumerate(self.agent_list)],
-                                label='查看智能体',
-                                info='选择一个智能体',
+                                label='View multiple agents',
+                                info='Select an agent',
                                 value=0,
                                 interactive=True,
                             )
@@ -362,7 +362,7 @@ class WebUI:
         if agent_interactive.function_map:
             capabilities = [key for key in agent_interactive.function_map.keys()]
             return gr.CheckboxGroup(
-                label='插件',
+                label='Tools',
                 value=capabilities,
                 choices=capabilities,
                 interactive=False,
@@ -370,7 +370,7 @@ class WebUI:
 
         else:
             return gr.CheckboxGroup(
-                label='插件',
+                label='Tools',
                 value=[],
                 choices=[],
                 interactive=False,
