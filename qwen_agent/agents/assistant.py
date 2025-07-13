@@ -115,7 +115,7 @@ class Assistant(FnCallAgent):
         #we will track separate memory inside separate agent
         #Todo... only track user persona in toplevel
         mem0_memories = None
-        if self.name != 'WeMeet':
+        if  self.name != 'WeMeet' and self.mem0:
             query = messages[-1]['content'][-1]['text']
             mem0_memories = self.mem0.search(query, user_id=self.name, limit=3, threshold=0.7)
             queryAdded = self.mem0.add(query, user_id=self.name)

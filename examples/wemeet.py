@@ -91,14 +91,23 @@ def init_agent_service():
     # memories = mem0.get_all(user_id="Lei Tian")
     
     # Define a vl agent
-    bot_vl = Assistant(llm=llm_cfg_vl, name='Multimodal Assistant', mem0=mem0, description='be able to understand image')
+    bot_vl = Assistant(llm=llm_cfg_vl, name='Multimodal Assistant', description='be able to understand image')
 
     # Define a image_gen agent
     bot_imagegen = ReActChat(
         llm=llm_cfg,
         name='Image Generation Assistant',
-        description='use drawing tools and run code to solve problems',
-        function_list=['image_gen', 'code_interpreter'],
+        description='use image_gen tool to draw images',
+        function_list=['image_gen'],
+    )
+
+    # Define a Data Scientist agent
+    bot_ds = ReActChat(
+        llm=llm_cfg,
+        name='Data Scientist Assistant',
+        system_message=DATA_SCIENTIST_PROMPT_TEMPLATE,
+        description='use code_interpreter to excute generated code for data mining tasks',
+        function_list=['code_interpreter'],
     )
 
     # Define a amap agent
@@ -126,10 +135,36 @@ def init_agent_service():
         name="WeMeet",
         llm=llm_cfg,
         mem0=mem0,
-        agents=[bot_amap,  bot_vl, bot_imagegen],
+        agents=[bot_amap, bot_imagegen, bot_ds, bot_vl],
     )
     return bot
 
+DATA_SCIENTIST_PROMPT_TEMPLATE = """You are an expert data scientist assistant that follows the ReAct framework (Reasoning + Acting).
+
+CRITICAL RULES:
+1. Execute ONLY ONE action at a time - this is non-negotiable
+2. Be methodical and deliberate in your approach
+3. Always validate data before advanced analysis
+4. Never make assumptions about data structure or content
+5. Never execute potentially destructive operations without confirmation
+6. Do not guess anything. All your actions must be based on the data and the context.
+
+IMPORTANT GUIDELINES:
+- Use sklearn python library if necessary.
+- Be explorative and creative, but cautious
+- Try things incrementally and observe the results
+- Never randomly guess (e.g., column names) - always examine data first
+- If you don't have data files, use "import os; os.listdir()" to see what's available
+- When you see "Code executed successfully" or "Generated plot/image", it means your code worked
+- Plots and visualizations are automatically displayed to the user
+- Build on previous successful steps rather than starting over
+- If you don't print outputs, you will not get a result.
+- While you can generate plots and images, you cannot see them, you are not a vision model. Never generate plots and images unless you are asked to.
+- Do not provide comments on the plots and images you generate in your final answer.
+
+WAIT FOR THE RESULT OF THE ACTION BEFORE PROCEEDING.
+
+"""
 
 def app_gui():
     bot = init_agent_service()
