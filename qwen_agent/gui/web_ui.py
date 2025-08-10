@@ -324,9 +324,19 @@ class WebUI:
             logger.info('agent_run response:\n' + pprint.pformat(responses, indent=2))
 
     def flushed(self):
+        """
+        Reset the input component to interactive state after processing.
+        Uses thread lock to prevent race conditions in concurrent environments.
+        """
         from qwen_agent.gui.gradio_dep import gr
-
-        return gr.update(interactive=True)
+        import threading
+        
+        # Use a lock to prevent race conditions in concurrent environments
+        if not hasattr(self, '_flush_lock'):
+            self._flush_lock = threading.Lock()
+            
+        with self._flush_lock:
+            return gr.update(interactive=True)
 
     def _get_agent_index_by_name(self, agent_name):
         if agent_name is None:
